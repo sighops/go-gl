@@ -17,6 +17,15 @@ const (
 	fragPath = "./shade.frag"
 )
 
+var (
+quad = []float32{
+        -1.0, 1.0, 0,
+        1.0, 1.0, 0,
+        -1.0, -1.0, 0,
+        1.0, -1.0, 0, 
+    }
+)
+
 func main() {
 	runtime.LockOSThread()
 
@@ -25,8 +34,9 @@ func main() {
 
 	program := initOpenGL()
 
+	vao := makeVao(quad)
 	for !window.ShouldClose() {
-		draw(window, program)
+		draw(vao, window, program)
 	}
 }
 
@@ -66,9 +76,12 @@ func initOpenGL() uint32 {
 	return prog
 }
 
-func draw(window *glfw.Window, program uint32) {
+func draw(vao uint32, window *glfw.Window, program uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
+
+	gl.BindVertexArray(vao)
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(quad) / 3))
 
 	glfw.PollEvents()
 	window.SwapBuffers()
@@ -77,7 +90,7 @@ func draw(window *glfw.Window, program uint32) {
 func loadShader(path string) string {
 	data, err := ioutil.ReadFile(path)
 	check_err(err)
-	return string(data)
+	return string(data) + "\x00"
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -101,6 +114,22 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	}
 
 	return shader, nil
+}
+
+func makeVao(points []float32) uint32 {
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
+	gl.EnableVertexAttribArray(0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+
+	return vao
 }
 
 func check_err(e error) {
