@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"fmt"
+	"os"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -31,6 +32,7 @@ func main() {
 	runtime.LockOSThread()
 
 	window := initGlfw()
+	window.SetKeyCallback(keyCallback)
 	defer glfw.Terminate()
 
 	var elapsed float32
@@ -54,6 +56,7 @@ func initGlfw() *glfw.Window {
 
 	window, err := glfw.CreateWindow(width, height, "Shader Thing", nil, nil)
 	check_err(err)
+
 
 	window.MakeContextCurrent()
 
@@ -133,6 +136,12 @@ func makeVao(points []float32) uint32 {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
 
 	return vao
+}
+
+func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	if key == glfw.KeyEscape && action == glfw.Press {
+		os.Exit(0)
+	}
 }
 
 func check_err(e error) {
