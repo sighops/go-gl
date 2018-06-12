@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	width = 500
-	height = 500
+	width = 960
+	height = 540
 	vertPath = "./shade.vert"
 	fragPath = "./shade.frag"
 )
@@ -33,20 +33,13 @@ func main() {
 	window := initGlfw()
 	defer glfw.Terminate()
 
-
-	startTime := glfw.GetTime()
-	elapsed := float32(glfw.GetTime())
+	var elapsed float32
 	program := initOpenGL()
-	gl.UseProgram(program)
 	vao := makeVao(quad)
 	for !window.ShouldClose() {
-		elapsed = float32(glfw.GetTime() - startTime)
-		//gl.UseProgram(program)
+		elapsed = float32(glfw.GetTime())
 		draw(vao, window, program, elapsed)
-		log.Println(elapsed)
 		gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
-		if elapsed == 1{
-		}
 	}
 }
 
@@ -59,7 +52,7 @@ func initGlfw() *glfw.Window {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	window, err := glfw.CreateWindow(width, height, "Stupid Shit", nil, nil)
+	window, err := glfw.CreateWindow(width, height, "Shader Thing", nil, nil)
 	check_err(err)
 
 	window.MakeContextCurrent()
