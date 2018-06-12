@@ -22,8 +22,9 @@ quad = []float32{
         -1.0, 1.0, 0,
         1.0, 1.0, 0,
         -1.0, -1.0, 0,
-        1.0, -1.0, 0, 
+        1.0, -1.0, 0,
     }
+
 )
 
 func main() {
@@ -32,11 +33,20 @@ func main() {
 	window := initGlfw()
 	defer glfw.Terminate()
 
-	program := initOpenGL()
 
+	startTime := glfw.GetTime()
+	elapsed := float32(glfw.GetTime())
+	program := initOpenGL()
+	gl.UseProgram(program)
 	vao := makeVao(quad)
 	for !window.ShouldClose() {
-		draw(vao, window, program)
+		elapsed = float32(glfw.GetTime() - startTime)
+		//gl.UseProgram(program)
+		draw(vao, window, program, elapsed)
+		log.Println(elapsed)
+		gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
+		if elapsed == 1{
+		}
 	}
 }
 
@@ -76,13 +86,13 @@ func initOpenGL() uint32 {
 	return prog
 }
 
-func draw(vao uint32, window *glfw.Window, program uint32) {
+func draw(vao uint32, window *glfw.Window, program uint32, elapsed float32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
 	gl.BindVertexArray(vao)
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(quad) / 3))
-
+//	gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
