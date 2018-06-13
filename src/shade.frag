@@ -1,6 +1,12 @@
 #version 410
 uniform float elapsed;
-out vec4 frag_colour;
+uniform vec2  u_resolution;
+out vec4 frag_color;
+
 void main() {
-    frag_colour = vec4(0,abs(sin(elapsed)), 0, 1);
+  vec2 coord = gl_FragCoord.xy / u_resolution;
+
+  vec3 color = vec3(0,0,0);
+  float opacity = 1.0;
+  frag_color = vec4(color, opacity);
 }

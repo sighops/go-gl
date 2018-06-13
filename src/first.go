@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	width = 960
-	height = 540
+	width = 600
+	height = 600
 	vertPath = "./shade.vert"
 	fragPath = "./shade.frag"
 )
@@ -35,13 +35,14 @@ func main() {
 	window.SetKeyCallback(keyCallback)
 	defer glfw.Terminate()
 
-	var elapsed float32
 	program := initOpenGL()
 	vao := makeVao(quad)
+	var elapsed float32
 	for !window.ShouldClose() {
 		elapsed = float32(glfw.GetTime())
 		draw(vao, window, program, elapsed)
 		gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
+		gl.Uniform2f(gl.GetUniformLocation(program, gl.Str("u_resolution\x00")), width, height)
 	}
 }
 
