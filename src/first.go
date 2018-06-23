@@ -9,23 +9,24 @@ import (
 	"os"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	//"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
-	width = 600
-	height = 600
+	width = 1200
+	height = 800
 	vertPath = "./shade.vert"
 	fragPath = "./shade.frag"
+	max_fps = 60
 )
 
 var (
-quad = []float32{
-        -1.0, 1.0, 0,
-        1.0, 1.0, 0,
-        -1.0, -1.0, 0,
-        1.0, -1.0, 0,
-    }
-
+	quad = []float32 {
+	        -1.0, 1.0, 0,
+	        1.0, 1.0, 0,
+	        -1.0, -1.0, 0,
+	        1.0, -1.0, 0,
+   }
 )
 
 func main() {
@@ -34,22 +35,33 @@ func main() {
 	window := initGlfw()
 	window.SetKeyCallback(keyCallback)
 	defer glfw.Terminate()
-
 	program := initOpenGL()
+		
 	vao := makeVao(quad)
+	last_time := glfw.GetTime()
 	var elapsed float32
+	var wWidth int
+	var wHeight int
+	var scale float32
 	for !window.ShouldClose() {
-		elapsed = float32(glfw.GetTime())
-		draw(vao, window, program, elapsed)
-		gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
-		gl.Uniform2f(gl.GetUniformLocation(program, gl.Str("u_resolution\x00")), width, height)
+		wWidth, wHeight = window.GetSize()
+		if glfw.GetTime() - last_time >= 1.0/max_fps {
+			gl.Viewport(0,0, int32(wWidth), int32(wHeight))
+			last_time = glfw.GetTime()
+			elapsed = float32(glfw.GetTime())
+			scale = float32(wWidth)/float32(wHeight)
+			gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("u_time\x00")), elapsed)
+			gl.Uniform2f(gl.GetUniformLocation(program, gl.Str("u_resolution\x00")), float32(wWidth), float32(wHeight))
+			gl.Uniform2f(gl.GetUniformLocation(program, gl.Str("u_scale\x00")), scale, 1.0)
+			draw(vao, window, program, elapsed)
+		}
 	}
 }
 
 func initGlfw() *glfw.Window {
 	check_err(glfw.Init())
 
-	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
@@ -76,11 +88,12 @@ func initOpenGL() uint32 {
 	fragmentShader, err := compileShader(loadShader(fragPath), gl.FRAGMENT_SHADER)
 	check_err(err)
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-	return prog
+	program := gl.CreateProgram()
+
+	gl.AttachShader(program, vertexShader)
+	gl.AttachShader(program, fragmentShader)
+	gl.LinkProgram(program)
+	return program
 }
 
 func draw(vao uint32, window *glfw.Window, program uint32, elapsed float32) {
@@ -89,7 +102,6 @@ func draw(vao uint32, window *glfw.Window, program uint32, elapsed float32) {
 
 	gl.BindVertexArray(vao)
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(quad) / 3))
-//	gl.Uniform1f(gl.GetUniformLocation(program, gl.Str("elapsed\x00")), elapsed)
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
@@ -127,7 +139,7 @@ func makeVao(points []float32) uint32 {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(points)*4, gl.Ptr(points), gl.STATIC_DRAW)
 
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
