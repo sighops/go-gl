@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	width = 1200
-	height = 800
+	width = 900
+	height = 600
 	vertPath = "./shade.vert"
 	fragPath = "./march.frag"
 	max_fps = 60

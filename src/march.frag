@@ -4,8 +4,8 @@ uniform vec2  u_resolution;
 uniform vec2 u_scale;
 out vec4 fragColor;
 
-const int MAX_STEPS = 128;
-const float STEP_SCALE = 0.5;
+const int MAX_STEPS = 96;
+const float STEP_SCALE = 0.75;
 const float eps = 0.005; 
 
 float random (in vec2 st) {
@@ -34,6 +34,20 @@ float noise (in vec2 st) {
     return mix(a, b, u.x) +
             (c - a)* u.y * (1.0 - u.x) +
             (d - b) * u.x * u.y;
+}
+
+// Rotates a point t radians around the y-axis
+vec3 rotateY(vec3 v, float t)
+{
+  float cost = cos(t); float sint = sin(t);
+  return vec3(v.x * cost + v.z * sint, v.y, -v.x * sint + v.z * cost);
+}
+
+// Rotates a point t radians around the x-axis
+vec3 rotateX(vec3 v, float t)
+{
+  float cost = cos(t); float sint = sin(t);
+  return vec3(v.x, v.y * cost - v.z * sint, v.y * sint + v.z * cost);
 }
 
 float torus( vec3 p, vec2 t )
@@ -67,7 +81,7 @@ float sphere(vec3 p, vec3 center, float radius)
 float sinusoid(vec3 p)
 {
   return cos(p.x*3.+sin(u_time)*0.7)* sin(p.y*3.+sin(u_time)*0.4) * cos(p.z*-3+sin(u_time)*0.4) 
-          + 0.6*cos(p.x*18.+sin(u_time)*1.4) * sin(p.y*18.+sin(u_time)*0.4) * cos(p.z*-18.+sin(u_time)*0.8);
+          + 0.8*cos(p.x*18.+sin(u_time)*1.4) * sin(p.y*18.+sin(u_time)*0.4) * cos(p.z*-18.+sin(u_time)*0.8);
 }
 
 float scene(vec3 p)
@@ -76,10 +90,12 @@ float scene(vec3 p)
   //return sphere(p, vec3(0.0, 0.0, 9.0), 4.0) + cos(5.0+sin(u_time/4)*2.5 * p.x) * sin(5.0+cos(u_time/4)*2.5 * p.y) * cos(5.0+sin(u_time/4)*2.5 * p.z) * 0.25;
   //return sphere(p, vec3(0.0, 0.0, 9.0), 4.0) + 0.4*sinusoid(p);
   return min(
-              max(sdBox(p, vec3(.5,0.5,0.5)), 
-                  -sphere(p, vec3(0.0, 0.0, 0.0), .65)), 
-              sphere(p, vec3(0.0, 0.0, 0.0), .3) + 0.2*sinusoid(p)
-              );
+              max(sdBox(p, vec3(.5,0.8,0.5)), 
+                  -sphere(p, vec3(cos(u_time)*0.1+0.0, cos(u_time/4)*-2.0, cos(u_time)*0.1+0.0), .75) + 0.04*sinusoid(p)), 
+              sphere(p, vec3(cos(u_time)*0.1+0.0, cos(u_time/4)*-2.0, cos(u_time)*0.1+0.0), .3) + 0.1*sinusoid(p)
+            );
+  //return torus(p, vec2(0.7,0.2)) + 0.2*sinusoid(p);
+  //return sdPlane(p, vec4(0.0,0.0,.1,0.1));
 }
 
 float march(vec3 origin, vec3 direction, float start, float end)
@@ -113,7 +129,7 @@ vec3 getNormal(in vec3 p)
 
 void main()
 {
-  vec3 cameraPos = vec3(sin(u_time/2)*-2.0, .5, cos(u_time/2)*-2.0);
+  vec3 cameraPos = vec3(sin(u_time/4)*-2.0, 0.5, cos(u_time/4)*-2.0);
   vec3 cameraLookAt = vec3(0.0, 0.0, 0.0);
   vec2 aspectRatio = vec2(u_resolution.x/u_resolution.y, 1.0);
   vec2 screenCoords = vec2(2 * gl_FragCoord.xy/u_resolution.xy - 1.0) * aspectRatio;
@@ -140,7 +156,7 @@ void main()
   vec3 surfacePos = rayOrigin + rayDir*dist;
   vec3 surfaceNormal = getNormal(surfacePos);
   
-  vec3 lightPos = vec3(1.5*cos(u_time*0.5), 0.75+0.25*sin(u_time*0.5), -3.0);
+  vec3 lightPos = vec3(sin(u_time/4)*-2.0,0.5, cos(u_time/4)*-2.0);
 
   vec3 lightDir = lightPos-surfacePos;
 
@@ -150,6 +166,6 @@ void main()
   float diffuse = max( 0.0, dot(surfaceNormal, lightDir) );
   float specular = max( 0.0, dot( ref, normalize(cameraPos-surfacePos)) ); 
 
-  vec3 spherecolor = vec3(abs(sin(u_time/2))*0.5, abs(cos(u_time/2))*0.5,abs(sin(u_time/4))*0.5) * (diffuse*.3) + specular*0.01;
+  vec3 spherecolor = vec3(abs(sin(u_time/2))*0.5, abs(cos(u_time/2))*0.5,abs(sin(u_time/4))*0.5) * (diffuse*.7) + specular*0.1;
   fragColor = vec4(spherecolor,1.0);
 }
