@@ -87,7 +87,7 @@ vec3 getNormal(in vec3 p)
 
 float scene(vec3 p)
 {
-  reutrn 1.0;
+  reutrn sphere(p, vec3(0.0, 0.0, 0.0), 1.0);
 }
 
 void main()
@@ -121,7 +121,7 @@ void main()
   
   vec3 lightPos = vec3(0.0,0.5,-2.0);
 
-  vec3 lightDir = lightPos-surfacePos;
+  vec3 lightDir = normalize(lightPos-surfacePos);
 
   vec3 lightColor = vec3(1.,0.97,0.92);
 
@@ -129,6 +129,6 @@ void main()
   float diffuse = max( 0.0, dot(surfaceNormal, lightDir) );
   float specular = max( 0.0, dot( ref, normalize(cameraPos-surfacePos)) ); 
 
-  vec3 spherecolor = vec3(abs(sin(u_time/2))*0.5, abs(cos(u_time/2))*0.5,abs(sin(u_time/4))*0.5) * (diffuse*.7) + specular*0.1;
-  fragColor = vec4(spherecolor,1.0);
+  vec3 color = vec3(abs(sin(u_time/2))*0.5, abs(cos(u_time/2))*0.5,abs(sin(u_time/4))*0.5) * (diffuse*.7) + specular*0.1;
+  fragColor = vec4(color,1.0);
 }
