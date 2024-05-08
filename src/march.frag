@@ -6,7 +6,7 @@ out vec4 fragColor;
 
 const int MAX_STEPS = 128;
 const float STEP_SCALE = 0.75;
-const float eps = 0.005; 
+const float eps = 0.005;
 
 float random (in vec2 st) {
     return fract(sin(dot(st.xy,
@@ -73,14 +73,14 @@ float sdBox( vec3 p, vec3 b )
   return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
 
-float sphere(vec3 p, vec3 center, float radius) 
+float sphere(vec3 p, vec3 center, float radius)
 {
   return length(p - center) - radius;
 }
 
 float sinusoid(vec3 p)
 {
-  return cos(p.x*3.+sin(u_time)*0.7)* sin(p.y*3.+sin(u_time)*0.4) * cos(p.z*-3+sin(u_time)*0.4) 
+  return cos(p.x*3.+sin(u_time)*0.7)* sin(p.y*3.+sin(u_time)*0.4) * cos(p.z*-3+sin(u_time)*0.4)
           + 0.8*cos(p.x*18.+sin(u_time)*1.4) * sin(p.y*18.+sin(u_time)*0.4) * cos(p.z*-18.+sin(u_time)*0.8);
 }
 
@@ -90,8 +90,8 @@ float scene(vec3 p)
   //return sphere(p, vec3(0.0, 0.0, 9.0), 4.0) + cos(5.0+sin(u_time/4)*2.5 * p.x) * sin(5.0+cos(u_time/4)*2.5 * p.y) * cos(5.0+sin(u_time/4)*2.5 * p.z) * 0.25;
   //return sphere(p, vec3(0.0, 0.0, 9.0), 4.0) + 0.4*sinusoid(p);
   return min(
-              max(sdBox(p, vec3(.5,0.8,0.5)), 
-                  -sphere(p, vec3(cos(u_time)*0.2+0.0, cos(u_time/4)*-2.0, cos(u_time)*0.1+0.0), .75) + 0.04*sinusoid(p)), 
+              max(sdBox(p, vec3(.5,0.8,0.5)),
+                  -sphere(p, vec3(cos(u_time)*0.2+0.0, cos(u_time/4)*-2.0, cos(u_time)*0.1+0.0), .75) + 0.04*sinusoid(p)),
               sphere(p, vec3(cos(u_time)*0.2+0.0, cos(u_time/4)*-2.0, cos(u_time)*0.1+0.0), .3) + 0.1*sinusoid(p)
             );
   //return torus(p, vec2(0.7,0.2)) + 0.2*sinusoid(p);
@@ -117,9 +117,9 @@ float march(vec3 origin, vec3 direction, float start, float end)
   return rayDepth;
 }
 
-vec3 getNormal(in vec3 p) 
+vec3 getNormal(in vec3 p)
 {
-  
+
   return normalize(vec3(
     scene(vec3(p.x+eps,p.y,p.z))-scene(vec3(p.x-eps,p.y,p.z)),
     scene(vec3(p.x,p.y+eps,p.z))-scene(vec3(p.x,p.y-eps,p.z)),
@@ -155,7 +155,7 @@ void main()
 
   vec3 surfacePos = rayOrigin + rayDir*dist;
   vec3 surfaceNormal = getNormal(surfacePos);
-  
+
   vec3 lightPos = vec3(sin(u_time/4)*-2.0,1.0, cos(u_time/4)*-2.0);
 
   vec3 lightDir = lightPos-surfacePos;
@@ -164,7 +164,7 @@ void main()
 
   vec3 ref = reflect(-lightDir, surfaceNormal);
   float diffuse = max( 0.0, dot(surfaceNormal, lightDir) );
-  float specular = max( 0.0, dot( ref, normalize(cameraPos-surfacePos)) ); 
+  float specular = max( 0.0, dot( ref, normalize(cameraPos-surfacePos)) );
 
   vec3 spherecolor = vec3(abs(sin(u_time/2))*0.5, abs(cos(u_time/2))*0.5,abs(sin(u_time/4))*0.5) * (diffuse*.7) + specular*0.01;
   fragColor = vec4(spherecolor,1.0);

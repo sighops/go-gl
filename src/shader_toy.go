@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"os"
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	//"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
-	width = 900
-	height = 600
+	width = 1920
+	height = 1080
 	vertPath = "./shade.vert"
 	fragPath = "./march.frag"
 	max_fps = 60
@@ -36,7 +36,7 @@ func main() {
 	window.SetKeyCallback(keyCallback)
 	defer glfw.Terminate()
 	program := initOpenGL()
-		
+
 	vao := makeVao(quad)
 	last_time := glfw.GetTime()
 	var elapsed float32
@@ -44,7 +44,7 @@ func main() {
 	var wHeight int
 	var scale float32
 	for !window.ShouldClose() {
-		wWidth, wHeight = window.GetSize()
+		wWidth, wHeight = window.GetFramebufferSize()
 		if glfw.GetTime() - last_time >= 1.0/max_fps {
 			gl.Viewport(0,0, int32(wWidth), int32(wHeight))
 			last_time = glfw.GetTime()
@@ -128,7 +128,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-		
+
 		return 0, fmt.Errorf("failed to compile %v:%v", source, log)
 	}
 

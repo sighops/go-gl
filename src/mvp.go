@@ -40,14 +40,14 @@ func main() {
   defer glfw.Terminate()
   program := initOpenGL()
   gl.UseProgram(program)
-  
+
   projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(width)/float32(height), 0.1, 10.0)
   projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
   gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
   //camera := mgl32.Ident4()
   //camera = mgl32.Translate3D(0.0,0.0,-3.0)
-  
+
   camera := mgl32.LookAtV(mgl32.Vec3{0, 0, 1}, // location
                           mgl32.Vec3{0, 0, 0}, // look direction
                           mgl32.Vec3{0, 1, 0}) // up direction
@@ -154,7 +154,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
     log := strings.Repeat("\x00", int(logLength+1))
     gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-    
+
     return 0, fmt.Errorf("failed to compile %v:%v", source, log)
   }
 
